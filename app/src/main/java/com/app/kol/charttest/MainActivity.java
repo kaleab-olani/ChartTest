@@ -1,6 +1,7 @@
 package com.app.kol.charttest;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -27,6 +28,7 @@ import com.anychart.AnyChartView;
 import com.anychart.chart.common.dataentry.DataEntry;
 import com.anychart.chart.common.dataentry.ValueDataEntry;
 import com.anychart.charts.Pie;
+import com.db.williamchart.view.DonutChartView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -35,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,32 +46,76 @@ public class MainActivity extends AppCompatActivity {
     int currentView = 0;
     PieChart pie;
     AnyChartView anyChartView;
+    DonutChartView williamsPie;
+    ConstraintLayout anyChartHolder;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         pie = findViewById(R.id.pie_plot);
-        anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
+        anyChartView = findViewById(R.id.any_chart_view);
+        anyChartHolder = findViewById(R.id.any_chart_view_holder);
+        williamsPie = findViewById(R.id.williamsPie);
 
         fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
             switch (currentView){
                 case 0:
                     pie.setVisibility(View.INVISIBLE);
-                    anyChartView.setVisibility(View.VISIBLE);
+                    anyChartHolder.setVisibility(View.VISIBLE);
+                    williamsPie.setVisibility(View.INVISIBLE);
                     Snackbar.make(anyChartView,"Anychart view", BaseTransientBottomBar.LENGTH_LONG).show();
                     currentView = 1;
                     break;
                 case 1:
-                    anyChartView.setVisibility(View.INVISIBLE);
+                    williamsPie.setVisibility(View.INVISIBLE);
+                    anyChartHolder.setVisibility(View.INVISIBLE);
                     pie.setVisibility(View.VISIBLE);
                     Snackbar.make(anyChartView,"AndroidPlot view", BaseTransientBottomBar.LENGTH_LONG).show();
-                    currentView = 0;
+                    currentView = 2;
                     break;
+                case 2:
+                    williamsPie.setVisibility(View.VISIBLE);
+                    anyChartHolder.setVisibility(View.INVISIBLE);
+                    pie.setVisibility(View.INVISIBLE);
+                    Snackbar.make(anyChartView,"Williams view", BaseTransientBottomBar.LENGTH_LONG).show();
+                    currentView = 0;
             }
         });
         showPieChartFromAnyChart();
         showPieWithAndroidPlot();
+        showWilliamsPie();
+        williamsPie.setVisibility(View.VISIBLE);
+        anyChartHolder.setVisibility(View.INVISIBLE);
+        pie.setVisibility(View.INVISIBLE);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void showWilliamsPie() {
+        ArrayList<Float> floats = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            floats.add(10.0f);
+        }
+        int[] colors = new int[10];
+        Random random = new Random();
+        for (int i = 0; i < 10; i++) {
+            colors[i] = ( Color.rgb(random.nextInt(250),random.nextInt(250),random.nextInt(250)));
+        }
+        williamsPie.setDonutTotal(100);
+        williamsPie.setDonutColors(colors);
+        williamsPie.setDonutBackgroundColor(Color.LTGRAY);
+        williamsPie.setDonutThickness(100f);
+        williamsPie.setDonutRoundCorners(false);
+
+        williamsPie.setOnTouchListener((view, motionEvent) -> {
+            PointF click = new PointF(motionEvent.getX(), motionEvent.getY());
+
+            return false;
+        });
+//        williamsPie.show(floats);
+        williamsPie.animate(floats);
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
